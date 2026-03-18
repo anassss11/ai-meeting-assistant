@@ -2,12 +2,17 @@ import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file before importing other modules
+load_dotenv()
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
-from llama_config import LLaMAConfig
-from llama_fallback import LLaMAFallbackHandler
-from llama_summarizer import generate_llama_summary, get_llama_decisions, get_llama_action_items
+from nvidia_config import NVIDIAConfig
+from nvidia_fallback import NVIDIAFallbackHandler
+from nvidia_summarizer import generate_nvidia_summary, get_nvidia_decisions, get_nvidia_action_items
 from meeting_analysis import extract_action_items, extract_decisions, extract_summary
 from models import (
     ActionItemsResponse,
@@ -35,12 +40,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize LLaMA configuration
-llama_config = LLaMAConfig.from_env()
-llama_config.validate()
+# Initialize NVIDIA configuration
+nvidia_config = NVIDIAConfig.from_env()
+nvidia_config.validate()
 
 # Initialize fallback handler
-fallback_handler = LLaMAFallbackHandler()
+fallback_handler = NVIDIAFallbackHandler()
 
 
 def ensure_transcript_file() -> None:
@@ -83,19 +88,19 @@ def read_root() -> dict[str, str]:
 
 
 
-@app.get("/health/llama")
-def llama_health_check() -> dict[str, object]:
+@app.get("/health/nvidia")
+def nvidia_health_check() -> dict[str, object]:
     """
-    Check LLaMA 3 model availability and status.
+    Check NVIDIA Qwen 3.5 model availability and status.
     
     Returns:
         Dictionary with:
-        - status: "healthy" if LLaMA 3 available, "degraded" if using fallback
-        - mode: "llama" if LLaMA 3 available, "fallback" if using fallback
+        - status: "healthy" if NVIDIA available, "degraded" if using fallback
+        - mode: "nvidia" if NVIDIA available, "fallback" if using fallback
         - details: Status details from fallback_handler.get_status()
     """
-    status = "healthy" if fallback_handler.is_llama_available() else "degraded"
-    mode = "llama" if fallback_handler.is_llama_available() else "fallback"
+    status = "healthy" if fallback_handler.is_nvidia_available() else "degraded"
+    mode = "nvidia" if fallback_handler.is_nvidia_available() else "fallback"
     
     return {
         "status": status,
@@ -104,14 +109,14 @@ def llama_health_check() -> dict[str, object]:
     }
 
 
-@app.get("/metrics/llama")
-def llama_metrics() -> dict[str, object]:
+@app.get("/metrics/nvidia")
+def nvidia_metrics() -> dict[str, object]:
     """
-    Get LLaMA 3 summarization metrics for monitoring and observability.
+    Get NVIDIA Qwen 3.5 summarization metrics for monitoring and observability.
     
     Returns metrics about summarization requests including:
     - total_requests: Total number of summarization requests
-    - llama_requests: Number of successful LLaMA 3 requests
+    - nvidia_requests: Number of successful NVIDIA requests
     - fallback_requests: Number of fallback requests
     - error_count: Number of errors encountered
     - fallback_rate: Percentage of requests using fallback (0.0-1.0)
@@ -185,7 +190,7 @@ def get_summary() -> SummaryResponse:
         return SummaryResponse(summary=EMPTY_SUMMARY)
     
     try:
-        summary = generate_llama_summary(transcript, llama_config, fallback_handler)
+        summary = generate_nvidia_summary(transcript, nvidia_config, fallback_handler)
         end_time = time.time()
         duration = end_time - start_time
         logger.info(f"Summary generated in {duration:.2f} seconds: {len(summary)} characters")
@@ -203,13 +208,13 @@ def get_summary() -> SummaryResponse:
 def get_action_items() -> ActionItemsResponse:
     transcript = read_transcript_text()
     
-    # Try to get LLaMA-extracted action items first
-    llama_action_items = get_llama_action_items()
-    if llama_action_items:
+    # Try to get NVIDIA-extracted action items first
+    nvidia_action_items = get_nvidia_action_items()
+    if nvidia_action_items:
         # Convert to ActionItem objects
         from models import ActionItem
         structured_items = []
-        for item in llama_action_items:
+        for item in nvidia_action_items:
             if isinstance(item, dict):
                 structured_items.append(ActionItem(
                     task=item.get("task", ""),
@@ -269,10 +274,10 @@ def get_action_items() -> ActionItemsResponse:
 def get_decisions() -> DecisionsResponse:
     transcript = read_transcript_text()
     
-    # Try to get LLaMA-extracted decisions first
-    llama_decisions = get_llama_decisions()
-    if llama_decisions:
-        return DecisionsResponse(decisions=llama_decisions)
+    # Try to get NVIDIA-extracted decisions first
+    nvidia_decisions = get_nvidia_decisions()
+    if nvidia_decisions:
+        return DecisionsResponse(decisions=nvidia_decisions)
     
     # Fallback to regex-based extraction
     return DecisionsResponse(decisions=extract_decisions(transcript))

@@ -144,7 +144,7 @@ function App() {
         <div>
           <p style={eyebrowStyle}>AI Meeting Assistant</p>
           <h1 style={titleStyle}>Meeting Dashboard</h1>
-          <p style={metaStyle}>Connected to `http://127.0.0.1:8000` - Using LLaMA 3 AI for summaries - Manual refresh only.</p>
+          <p style={metaStyle}>Connected to `http://127.0.0.1:8000` - Using NVIDIA Qwen 3.5 AI for summaries - No timeout, will wait until complete.</p>
           <p style={metaStyle}>Last updated: {lastUpdated || "waiting for first response"}</p>
         </div>
         <div style={actionsStyle}>
@@ -160,7 +160,7 @@ function App() {
         </div>
       </header>
 
-      {loading ? <div style={infoStyle}>Loading meeting data... (LLaMA 3 AI summary has no timeout - will wait until complete)</div> : null}
+      {loading ? <div style={infoStyle}>Loading meeting data... (NVIDIA Qwen 3.5 AI has no timeout - will wait until summary is complete)</div> : null}
       {error ? <div style={errorStyle}>Backend error: {error}</div> : null}
 
       <section style={gridStyle}>

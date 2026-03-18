@@ -20,7 +20,7 @@ function Summary({ text, loading }) {
       {loading ? (
         <div style={loadingStyle}>
           <div style={spinnerStyle}></div>
-          <p style={loadingTextStyle}>LLaMA 3 AI is generating summary... (no timeout - will wait until complete)</p>
+          <p style={loadingTextStyle}>NVIDIA Qwen 3.5 AI is generating summary... (no timeout - will wait until complete)</p>
         </div>
       ) : (
         <p style={bodyStyle}>{text || "No summary available yet."}</p>
