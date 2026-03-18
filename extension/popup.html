@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Meeting Assistant</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        min-width: 320px;
+        background: #f5f5f5;
+        color: #111827;
+      }
+
+      main {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 18px;
+        margin: 0 0 12px;
+      }
+
+      .status {
+        margin: 0 0 16px;
+        font-size: 14px;
+      }
+
+      .status strong {
+        display: inline-block;
+        min-width: 78px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+
+      label {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      select,
+      button {
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      select {
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+      }
+
+      .hint {
+        margin: -8px 0 16px;
+        font-size: 12px;
+        color: #4b5563;
+      }
+
+      .actions {
+        display: grid;
+        gap: 8px;
+      }
+
+      #startButton {
+        background: #047857;
+        color: #ffffff;
+      }
+
+      #stopButton {
+        background: #b91c1c;
+        color: #ffffff;
+      }
+
+      #dashboardButton {
+        background: #1d4ed8;
+        color: #ffffff;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:disabled,
+      select:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      #message {
+        margin: 12px 0 0;
+        font-size: 12px;
+        color: #4b5563;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>AI Meeting Assistant</h1>
+      <p class="status"><strong>Status:</strong> <span id="statusText">Idle</span></p>
+      <div class="field">
+        <label for="captureSourceSelect">Capture source</label>
+        <select id="captureSourceSelect">
+          <option value="tab">Browser tab</option>
+          <option value="desktop">Window or screen</option>
+        </select>
+      </div>
+      <p id="sourceHint" class="hint"></p>
+      <div id="tabField" class="field">
+        <label for="tabSelect">Record browser tab audio from</label>
+        <select id="tabSelect"></select>
+      </div>
+      <div class="actions">
+        <button id="startButton" type="button">Start Recording</button>
+        <button id="stopButton" type="button" disabled>Stop Recording</button>
+        <button id="dashboardButton" type="button">Open Dashboard</button>
+      </div>
+      <p id="message">Choose a source and start recording. The dashboard opens after recording and analysis finish.</p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

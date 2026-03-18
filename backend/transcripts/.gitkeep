@@ -1,0 +1,2 @@
+# This file ensures the transcripts directory is included in git
+# while ignoring the actual transcript files

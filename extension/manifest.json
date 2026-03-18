@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "AI Meeting Assistant",
+  "version": "0.1.0",
+  "description": "Meeting recording controller for capturing tab or window audio and streaming it to the backend.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "tabs",
+    "tabCapture",
+    "desktopCapture",
+    "activeTab",
+    "storage",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*"
+  ]
+}
