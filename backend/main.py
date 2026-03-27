@@ -208,6 +208,15 @@ def get_summary() -> SummaryResponse:
 def get_action_items() -> ActionItemsResponse:
     transcript = read_transcript_text()
     
+    if not transcript.strip():
+        return ActionItemsResponse(action_items=[])
+    
+    # Ensure NVIDIA summary has been generated first (which populates NVIDIA data)
+    try:
+        generate_nvidia_summary(transcript, nvidia_config, fallback_handler)
+    except Exception as e:
+        logger.warning(f"Failed to generate summary for action items: {e}")
+    
     # Try to get NVIDIA-extracted action items first
     nvidia_action_items = get_nvidia_action_items()
     if nvidia_action_items:
@@ -274,10 +283,173 @@ def get_action_items() -> ActionItemsResponse:
 def get_decisions() -> DecisionsResponse:
     transcript = read_transcript_text()
     
+    if not transcript.strip():
+        return DecisionsResponse(decisions=[])
+    
+    # Ensure NVIDIA summary has been generated first (which populates NVIDIA data)
+    try:
+        generate_nvidia_summary(transcript, nvidia_config, fallback_handler)
+    except Exception as e:
+        logger.warning(f"Failed to generate summary for decisions: {e}")
+    
     # Try to get NVIDIA-extracted decisions first
     nvidia_decisions = get_nvidia_decisions()
     if nvidia_decisions:
-        return DecisionsResponse(decisions=nvidia_decisions)
+        # Filter out facts, system descriptions, and limitations
+        filtered_decisions = []
+        for decision in nvidia_decisions:
+            decision_lower = decision.lower()
+            
+            # Skip if it's a system description or fact
+            if any(phrase in decision_lower for phrase in [
+                "is single-threaded",
+                "is single threaded",
+                "single-threaded",
+                "single threaded",
+                "system is",
+                "application is",
+                "we are using",
+                "we use",
+                "this is how",
+                "this is a",
+                "there is",
+                "there are",
+                "the system",
+                "the application",
+                "the current",
+                "currently",
+                "at the base",
+                "when we run",
+                "locally from",
+                "development server",
+                "run server command",
+                "only ideally",
+                "only one user",
+                "for development purpose",
+                "for development",
+                "need to figure out",
+                "will need to",
+                "needs to be done",
+                "challenge",
+                "problem",
+                "limitation",
+                "issue",
+                "difficulty"
+            ]):
+                continue
+            
+            filtered_decisions.append(decision)
+        
+        if filtered_decisions:
+            return DecisionsResponse(decisions=filtered_decisions)
     
     # Fallback to regex-based extraction
     return DecisionsResponse(decisions=extract_decisions(transcript))
+
+
+
+@app.post("/upload-transcript")
+async def upload_transcript(file: UploadFile = File(...)) -> dict:
+    """
+    Upload and analyze a transcript file (PDF, TXT, DOCX).
+    
+    Args:
+        file: Uploaded file (PDF, TXT, or DOCX)
+    
+    Returns:
+        Dictionary with summary, decisions, and action items
+    """
+    try:
+        # Validate file type
+        suffix = Path(file.filename or "").suffix.lower()
+        if suffix not in ['.pdf', '.txt', '.docx']:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file type: {suffix}. Supported types: .pdf, .txt, .docx"
+            )
+        
+        # Save uploaded file temporarily
+        with NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+            content = await file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+            
+            temp_file.write(content)
+            temp_path = Path(temp_file.name)
+        
+        try:
+            # Extract text from file
+            from file_extractor import extract_text_from_file
+            logger.info(f"Extracting text from {suffix} file")
+            transcript = extract_text_from_file(temp_path)
+            
+            if not transcript.strip():
+                raise HTTPException(status_code=400, detail="No text could be extracted from the file.")
+            
+            logger.info(f"Extracted {len(transcript)} characters from uploaded file")
+            
+            # Save transcript to the system transcript file
+            ensure_transcript_file()
+            TRANSCRIPT_FILE.write_text(transcript, encoding="utf-8")
+            logger.info("Transcript saved to system file")
+            
+            # Generate analysis using NVIDIA Qwen 3.5
+            logger.info("Generating analysis for uploaded transcript")
+            
+            try:
+                summary = generate_nvidia_summary(transcript, nvidia_config, fallback_handler)
+            except Exception as e:
+                logger.error(f"Summary generation failed: {e}")
+                summary = extract_summary(transcript)
+            
+            # Get decisions and action items
+            nvidia_decisions = get_nvidia_decisions()
+            decisions = nvidia_decisions if nvidia_decisions else extract_decisions(transcript)
+            
+            nvidia_action_items = get_nvidia_action_items()
+            if nvidia_action_items:
+                from models import ActionItem
+                action_items = []
+                for item in nvidia_action_items:
+                    if isinstance(item, dict):
+                        action_items.append({
+                            "task": item.get("task", ""),
+                            "owner": item.get("owner", "Not specified"),
+                            "deadline": item.get("deadline", "Not specified")
+                        })
+                    else:
+                        action_items.append({
+                            "task": str(item),
+                            "owner": "Not specified",
+                            "deadline": "Not specified"
+                        })
+            else:
+                regex_items = extract_action_items(transcript)
+                action_items = [
+                    {
+                        "task": item,
+                        "owner": "Not specified",
+                        "deadline": "Not specified"
+                    }
+                    for item in regex_items
+                ]
+            
+            logger.info("Analysis complete for uploaded transcript")
+            
+            return {
+                "summary": summary,
+                "decisions": decisions,
+                "action_items": action_items,
+                "file_name": file.filename,
+                "characters_extracted": len(transcript)
+            }
+        
+        finally:
+            # Clean up temporary file
+            temp_path.unlink(missing_ok=True)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing uploaded transcript: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to process transcript: {str(e)}")

@@ -1,331 +1,178 @@
 # 🎙️ AI Meeting Assistant
 
-> **Transform your meetings with AI-powered transcription, summarization, and intelligent action item extraction**
+Transform your meetings with AI-powered transcription, summarization, and intelligent action item extraction using NVIDIA Qwen 3.5.
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.116.1-green.svg)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org)
-[![NVIDIA Qwen 3.5](https://img.shields.io/badge/NVIDIA_Qwen_3.5-API-green.svg)](https://build.nvidia.com)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-## 🌟 Features
+## ✨ Features
 
 - **🎯 Real-time Audio Transcription** - High-accuracy speech-to-text using Faster Whisper
-- **🤖 AI-Powered Summarization** - NVIDIA Qwen 3.5 integration with intelligent fallback
-- **📋 Structured Action Items** - Extract tasks with owners and deadlines
-- **✅ Decision Tracking** - Automatically identify and catalog meeting decisions
+- **🤖 AI-Powered Summarization** - NVIDIA Qwen 3.5 for intelligent meeting analysis
+- **📋 Structured Extraction** - Automatically extract action items, decisions, and summaries
+- **📤 File Upload Support** - Analyze PDF, TXT, and DOCX files
 - **📊 Interactive Dashboard** - Beautiful React interface with real-time updates
-- **🔌 Chrome Extension** - Seamless browser integration for web meetings
-- **🛡️ Robust Fallback System** - Works even with limited system resources
-- **📤 Export Capabilities** - Download transcripts as CSV or TXT
+- ** Chrome Extension** - Seamless browser integration for web meetings
+- **� Export Capabilities** - Download transcripts as CSV or TXT
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
 - Python 3.11+
 - Node.js 16+
-- Ollama (optional, for enhanced AI features)
+- NVIDIA API Key (get from https://build.nvidia.com)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/ai-meeting-assistant.git
-   cd ai-meeting-assistant
-   ```
-
-2. **Set up the backend**
+1. **Clone and setup backend**
    ```bash
    cd backend
    pip install -r requirements.txt
+   cp .env.example .env
+   # Edit .env and add your NVIDIA_API_KEY
    ```
 
-3. **Set up the frontend**
+2. **Setup frontend**
    ```bash
-   cd ../dashboard
+   cd dashboard
    npm install
    ```
 
-4. **Configure NVIDIA API (for enhanced AI)**
-   ```bash
-   cd backend
-   cp .env.example .env
-   # Edit .env and add your NVIDIA API key:
-   # NVIDIA_API_KEY=your_nvidia_api_key_here
-   ```
-   ```bash
-   # Get your NVIDIA API key from https://build.nvidia.com
-   # No additional installation required - API-based
-   ```
+### Running
 
-### Running the Application
-
-1. **Start the backend server**
+1. **Start backend**
    ```bash
    cd backend
    python -m uvicorn main:app --host 127.0.0.1 --port 8000
    ```
 
-2. **Start the frontend dashboard**
+2. **Start frontend**
    ```bash
    cd dashboard
    npm run dev
    ```
 
-3. **Access the application**
+3. **Access**
    - Dashboard: http://localhost:5173
-   - API Documentation: http://127.0.0.1:8000/docs
-   - Health Check: http://127.0.0.1:8000/health/nvidia
+   - API Docs: http://127.0.0.1:8000/docs
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Chrome         │    │  React          │    │  FastAPI        │
-│  Extension      │───▶│  Dashboard      │───▶│  Backend        │
-│                 │    │                 │    │                 │
-│ • Audio Capture │    │ • Real-time UI  │    │ • NVIDIA Qwen 3.5 │
-│ • File Upload   │    │ • Export Tools  │    │ • Transcription │
-│ • Integration   │    │ • Status Monitor│    │ • AI Processing │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                       │
-                                               ┌─────────────────┐
-                                               │  NVIDIA API     │
-                                               │  Qwen 3.5       │
-                                               │                 │
-                                               │ • Summarization │
-                                               │ • Action Items  │
-                                               │ • Decisions     │
-                                               └─────────────────┘
+Chrome Extension / File Upload
+         ↓
+    FastAPI Backend
+         ↓
+  NVIDIA Qwen 3.5 API
+         ↓
+React Dashboard
 ```
-
-## 📱 Screenshots
-
-### Dashboard Overview
-![Dashboard](docs/dashboard-overview.png)
-
-### Action Items with Structured Data
-![Action Items](docs/action-items.png)
-
-### Real-time Processing
-![Processing](docs/real-time-processing.png)
 
 ## 🔧 Configuration
 
-### Environment Variables
-
-Create a `.env` file in the `backend/` directory:
+Create `.env` in `backend/`:
 
 ```env
-# NVIDIA Qwen 3.5 Configuration
-NVIDIA_API_KEY=your_nvidia_api_key_here
+NVIDIA_API_KEY=your_key_here
 NVIDIA_MODEL=qwen/qwen3.5-397b-a17b
-NVIDIA_MAX_TOKENS=1024
-NVIDIA_TEMPERATURE=0.3
-NVIDIA_TOP_P=0.8
-NVIDIA_TOP_K=15
+NVIDIA_MAX_TOKENS=16384
+NVIDIA_TEMPERATURE=0.60
+NVIDIA_TOP_P=0.95
+NVIDIA_TOP_K=20
 NVIDIA_ENABLE_FALLBACK=true
 NVIDIA_REQUEST_TIMEOUT=0
 NVIDIA_MAX_RETRIES=3
-NVIDIA_ENABLE_THINKING=false
-
-# Optional: Custom settings
-NVIDIA_MAX_TRANSCRIPT_CHARS=15000
-NVIDIA_PRESENCE_PENALTY=0.0
-NVIDIA_REPETITION_PENALTY=1.0
+NVIDIA_MAX_TRANSCRIPT_CHARS=50000
 ```
 
-### API Endpoints
+## 📡 API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | Server status |
-| `/transcript` | GET | Current meeting transcript |
-| `/summary` | GET | AI-generated summary |
-| `/action-items` | GET | Structured action items |
-| `/decisions` | GET | Extracted decisions |
-| `/audio` | POST | Upload audio for transcription |
-| `/health/nvidia` | GET | NVIDIA API health status |
-| `/metrics/nvidia` | GET | Usage metrics |
+| `/transcript` | GET | Get current transcript |
+| `/summary` | GET | Get AI summary |
+| `/action-items` | GET | Get action items |
+| `/decisions` | GET | Get decisions |
+| `/audio` | POST | Upload audio |
+| `/upload-transcript` | POST | Upload file (PDF/TXT/DOCX) |
+| `/health/nvidia` | GET | NVIDIA API status |
 
-## 🤖 AI Integration
-
-### NVIDIA Qwen 3.5 Prompt Structure
-
-The system uses a carefully crafted prompt for structured extraction:
-
-```json
-{
-  "summary": "Brief factual summary (2-3 sentences)",
-  "decisions": ["Decision 1", "Decision 2"],
-  "action_items": [
-    {
-      "task": "Task description",
-      "owner": "Person or 'Not specified'",
-      "deadline": "Deadline or 'Not specified'"
-    }
-  ]
-}
-```
-
-### Intelligent Fallback
-
-When NVIDIA API is unavailable (due to network issues or API limits), the system automatically falls back to:
-- Enhanced regex-based extraction
-- Context-aware action item detection
-- Structured data formatting
-- Maintains full functionality
-
-## 🛠️ Development
-
-### Project Structure
+## 📁 Project Structure
 
 ```
 ai-meeting-assistant/
-├── backend/                 # FastAPI backend
-│   ├── main.py             # Main server application
-│   ├── llama_summarizer.py # LLaMA 3 integration
-│   ├── llama_config.py     # Configuration management
-│   ├── models.py           # Pydantic data models
-│   ├── transcribe.py       # Audio transcription
-│   └── requirements.txt    # Python dependencies
-├── dashboard/              # React frontend
+├── backend/
+│   ├── main.py                 # FastAPI server
+│   ├── nvidia_summarizer.py    # NVIDIA integration
+│   ├── file_extractor.py       # File parsing
+│   ├── meeting_analysis.py     # Fallback extraction
+│   └── requirements.txt        # Dependencies
+├── dashboard/
 │   ├── src/
-│   │   ├── App.jsx         # Main application
-│   │   ├── api.js          # API communication
-│   │   └── components/     # React components
-│   └── package.json        # Node.js dependencies
-├── extension/              # Chrome extension
-│   ├── manifest.json       # Extension manifest
-│   ├── popup.html          # Extension UI
-│   └── background.js       # Background scripts
-└── README.md              # This file
+│   │   ├── App.jsx
+│   │   ├── api.js
+│   │   └── components/
+│   └── package.json
+└── extension/
+    ├── manifest.json
+    ├── popup.html
+    └── popup.js
 ```
 
-### Running Tests
+## 🤖 How It Works
 
-```bash
-# Backend tests
-cd backend
-python -m pytest
+1. **Audio/File Input** - Record meeting or upload file
+2. **Transcription** - Convert audio to text using Faster Whisper
+3. **AI Analysis** - Send to NVIDIA Qwen 3.5 for:
+   - Summary generation
+   - Decision extraction
+   - Action item identification
+4. **Display** - Show results in dashboard with owner/deadline info
 
-# Frontend tests
-cd dashboard
-npm test
-```
+## 🔒 Privacy
 
-### Building for Production
+- All transcripts stored locally
+- No data retention on servers
+- Optional local processing with fallback mode
+- Secure API communication
 
-```bash
-# Build frontend
-cd dashboard
-npm run build
+## 📊 System Requirements
 
-# The built files will be in dashboard/dist/
-```
+**Minimum:**
+- RAM: 512MB
+- CPU: Dual-core
+- Storage: 1GB
 
-## 🚀 Deployment
-
-### Docker Deployment
-
-```bash
-# Build and run with Docker Compose
-docker-compose up --build
-
-# For GPU support (if available)
-docker-compose -f docker-compose-gpu.yml up --build
-```
-
-### Manual Deployment
-
-1. Set up a server with Python 3.11+ and Node.js
-2. Install dependencies as shown in Quick Start
-3. Configure environment variables
-4. Use a process manager like PM2 or systemd
-5. Set up a reverse proxy (nginx recommended)
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📊 Performance
-
-- **Transcription Accuracy**: 95%+ with Faster Whisper
-- **Processing Speed**: ~2-5 seconds per minute of audio
-- **Memory Usage**: 
-  - Minimum: 512MB (fallback mode)
-  - Recommended: 2GB+ (full LLaMA 3)
-- **Supported Audio Formats**: WAV, MP3, M4A, WebM
-
-## 🔒 Privacy & Security
-
-- **Local Processing**: All AI processing can run locally
-- **No Data Retention**: Transcripts stored locally only
-- **Secure Communication**: HTTPS support for production
-- **Privacy First**: No external API calls required (when using local LLaMA)
-
-## 📋 System Requirements
-
-### Minimum Requirements
-- **RAM**: 512MB (fallback mode)
-- **CPU**: Dual-core processor
-- **Storage**: 1GB free space
-- **OS**: Windows 10+, macOS 10.15+, Linux
-
-### Recommended Requirements
-- **RAM**: 2GB+ (for LLaMA 3)
-- **CPU**: Quad-core processor
-- **Storage**: 5GB free space (for models)
-- **GPU**: Optional, for faster processing
+**Recommended:**
+- RAM: 2GB+
+- CPU: Quad-core
+- Storage: 5GB
 
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-**LLaMA 3 not working?**
-- Check if Ollama is running: `ollama serve`
-- Verify model is installed: `ollama list`
-- System will automatically use fallback mode
-
-**Audio transcription failing?**
-- Ensure audio file is in supported format
-- Check file size (max 100MB recommended)
-- Verify microphone permissions for Chrome extension
+**Backend won't start?**
+- Check Python version: `python --version` (need 3.11+)
+- Verify NVIDIA_API_KEY is set in .env
+- Check port 8000 is available
 
 **Dashboard not loading?**
-- Confirm both backend and frontend are running
+- Ensure backend is running on http://127.0.0.1:8000
 - Check browser console for errors
-- Verify API endpoints are accessible
+- Try clearing cache and reloading
+
+**No decisions/action items?**
+- Ensure transcript has clear commitments or tasks
+- Check NVIDIA API is responding: http://127.0.0.1:8000/health/nvidia
+- Fallback extraction will activate if API fails
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-- [Ollama](https://ollama.ai) for local LLaMA 3 integration
-- [Faster Whisper](https://github.com/guillaumekln/faster-whisper) for audio transcription
-- [FastAPI](https://fastapi.tiangolo.com) for the robust backend framework
-- [React](https://reactjs.org) for the interactive frontend
-
-## 📞 Support
-
-- 📧 Email: support@example.com
-- 💬 Discord: [Join our community](https://discord.gg/example)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/ai-meeting-assistant/issues)
-- 📖 Documentation: [Full Documentation](https://docs.example.com)
+- [NVIDIA Qwen 3.5](https://build.nvidia.com) - AI model
+- [Faster Whisper](https://github.com/guillaumekln/faster-whisper) - Transcription
+- [FastAPI](https://fastapi.tiangolo.com) - Backend framework
+- [React](https://reactjs.org) - Frontend framework
 
 ---
 
-<div align="center">
-  <strong>Made with ❤️ for better meetings</strong>
-  <br>
-  <sub>Star ⭐ this repo if you find it helpful!</sub>
-</div>
+**Made with ❤️ for better meetings**
