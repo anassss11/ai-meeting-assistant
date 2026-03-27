@@ -42,13 +42,13 @@ export function fetchTranscript() {
 }
 
 export function fetchSummary() {
-  return fetchJson("/summary", 0); // No timeout - let BART take as long as needed
+  return fetchJson("/summary", 0); // No timeout - let NVIDIA take as long as needed
 }
 
 export function fetchActionItems() {
-  return fetchJson("/action-items", 10000);
+  return fetchJson("/action-items", 0); // No timeout - same as summary
 }
 
 export function fetchDecisions() {
-  return fetchJson("/decisions", 10000);
+  return fetchJson("/decisions", 0); // No timeout - same as summary
 }

@@ -67,7 +67,15 @@ function App() {
       
       fetchSummary()
         .then((summaryResponse) => {
-          setData((current) => ({ ...current, summary: summaryResponse.summary || "" }));
+          let summaryText = summaryResponse.summary || "";
+          
+          // Clean summary by removing decisions and action items sections
+          // (they're already handled by separate API calls)
+          let cleanedSummary = summaryText.split(/Decisions:/i)[0];
+          cleanedSummary = cleanedSummary.split(/Action Items:/i)[0];
+          cleanedSummary = cleanedSummary.trim();
+          
+          setData((current) => ({ ...current, summary: cleanedSummary }));
           markUpdated();
           setSummaryLoading(false);
         })

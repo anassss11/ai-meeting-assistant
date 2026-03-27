@@ -82,6 +82,11 @@
         color: #ffffff;
       }
 
+      #uploadButton {
+        background: #7c3aed;
+        color: #ffffff;
+      }
+
       button {
         cursor: pointer;
       }
@@ -119,7 +124,9 @@
         <button id="startButton" type="button">Start Recording</button>
         <button id="stopButton" type="button" disabled>Stop Recording</button>
         <button id="dashboardButton" type="button">Open Dashboard</button>
+        <button id="uploadButton" type="button">Upload Transcript File</button>
       </div>
+      <input id="fileInput" type="file" accept=".pdf,.txt,.docx" style="display: none;" />
       <p id="message">Choose a source and start recording. The dashboard opens after recording and analysis finish.</p>
     </main>
     <script src="popup.js"></script>

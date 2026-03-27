@@ -25,6 +25,8 @@ const tabSelect = document.getElementById("tabSelect");
 const startButton = document.getElementById("startButton");
 const stopButton = document.getElementById("stopButton");
 const dashboardButton = document.getElementById("dashboardButton");
+const uploadButton = document.getElementById("uploadButton");
+const fileInput = document.getElementById("fileInput");
 
 let analysisCheckPromise = null;
 
@@ -281,9 +283,56 @@ async function openDashboard() {
   messageText.textContent = "Dashboard opened in a new tab.";
 }
 
+async function uploadTranscriptFile() {
+  fileInput.click();
+}
+
+async function handleFileUpload(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const validTypes = [".pdf", ".txt", ".docx"];
+  const fileExtension = "." + file.name.split(".").pop().toLowerCase();
+  
+  if (!validTypes.includes(fileExtension)) {
+    messageText.textContent = "Invalid file type. Please upload a PDF, TXT, or DOCX file.";
+    return;
+  }
+
+  await updateStatus(STATUS.ANALYZING);
+  messageText.textContent = "Uploading and analyzing transcript file...";
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${BACKEND_BASE_URL}/upload-transcript`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    await updateStatus(STATUS.COMPLETE);
+    messageText.textContent = `File uploaded successfully! Extracted ${result.characters_extracted} characters. You can now open the dashboard.`;
+  } catch (error) {
+    await updateStatus(STATUS.IDLE);
+    messageText.textContent = error.message || "Failed to upload and analyze transcript file.";
+  }
+
+  // Reset file input
+  fileInput.value = "";
+}
+
 startButton.addEventListener("click", startMeeting);
 stopButton.addEventListener("click", stopMeeting);
 dashboardButton.addEventListener("click", openDashboard);
+uploadButton.addEventListener("click", uploadTranscriptFile);
+fileInput.addEventListener("change", handleFileUpload);
 tabSelect.addEventListener("change", () => setControls(statusText.textContent));
 captureSourceSelect.addEventListener("change", updateSourceField);
 
