@@ -184,9 +184,9 @@ function App() {
 const pageStyle = {
   minHeight: "100vh",
   padding: "32px",
-  background: "linear-gradient(180deg, #f3f4f6 0%, #e0f2fe 100%)",
+  background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdfa 100%)",
   color: "#0f172a",
-  fontFamily: "Arial, sans-serif",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   boxSizing: "border-box",
 };
 
@@ -194,9 +194,13 @@ const headerStyle = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
-  gap: "16px",
+  gap: "24px",
   flexWrap: "wrap",
-  marginBottom: "24px",
+  marginBottom: "32px",
+  background: "#ffffff",
+  padding: "28px",
+  borderRadius: "16px",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
 };
 
 const eyebrowStyle = {
@@ -204,17 +208,24 @@ const eyebrowStyle = {
   fontSize: "12px",
   letterSpacing: "0.12em",
   textTransform: "uppercase",
-  color: "#0f766e",
+  color: "#0d9488",
+  fontWeight: "700",
 };
 
 const titleStyle = {
   margin: "8px 0",
   fontSize: "36px",
+  fontWeight: "700",
+  background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text",
 };
 
 const metaStyle = {
   margin: "6px 0",
-  color: "#334155",
+  color: "#64748b",
+  fontSize: "14px",
 };
 
 const actionsStyle = {
@@ -225,33 +236,41 @@ const actionsStyle = {
 
 const buttonStyle = {
   border: 0,
-  borderRadius: "999px",
+  borderRadius: "12px",
   padding: "12px 18px",
-  background: "#0f766e",
+  background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
   color: "#ffffff",
   cursor: "pointer",
   fontSize: "14px",
+  fontWeight: "600",
+  transition: "all 0.3s ease",
+  boxShadow: "0 4px 12px rgba(13, 148, 136, 0.2)",
 };
 
 const infoStyle = {
   marginBottom: "16px",
-  padding: "12px 16px",
+  padding: "16px",
   borderRadius: "12px",
-  background: "#ffffff",
+  background: "#ecfdf5",
+  color: "#065f46",
+  border: "1px solid #a7f3d0",
+  fontWeight: "500",
 };
 
 const errorStyle = {
   marginBottom: "16px",
-  padding: "12px 16px",
+  padding: "16px",
   borderRadius: "12px",
-  background: "#fee2e2",
+  background: "#fef2f2",
   color: "#991b1b",
+  border: "1px solid #fecaca",
+  fontWeight: "500",
 };
 
 const gridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: "16px",
+  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+  gap: "20px",
 };
 
 export default App;

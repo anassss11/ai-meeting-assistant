@@ -20,29 +20,45 @@ function Decisions({ items }) {
 }
 
 const cardStyle = {
-  padding: "20px",
-  borderRadius: "18px",
-  background: "rgba(255, 255, 255, 0.88)",
-  boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+  padding: "24px",
+  borderRadius: "16px",
+  background: "#ffffff",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+  border: "1px solid #f0f9ff",
+  transition: "all 0.3s ease",
 };
 
 const titleStyle = {
-  margin: "0 0 12px",
-  fontSize: "22px",
+  margin: "0 0 16px",
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#0d9488",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
 };
 
 const listStyle = {
   margin: 0,
-  paddingLeft: "20px",
+  paddingLeft: 0,
+  listStyle: "none",
 };
 
 const itemStyle = {
-  marginBottom: "8px",
-  lineHeight: 1.5,
+  marginBottom: "12px",
+  lineHeight: 1.6,
+  padding: "12px",
+  background: "#f8fafc",
+  borderRadius: "12px",
+  border: "1px solid #e2e8f0",
+  borderLeft: "4px solid #0d9488",
+  color: "#334155",
+  fontSize: "15px",
 };
 
 const emptyStyle = {
   margin: 0,
+  color: "#94a3b8",
+  fontStyle: "italic",
 };
 
 export default Decisions;

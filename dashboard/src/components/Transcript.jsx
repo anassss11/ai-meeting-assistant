@@ -10,21 +10,31 @@ function Transcript({ text }) {
 }
 
 const cardStyle = {
-  padding: "20px",
-  borderRadius: "18px",
-  background: "rgba(255, 255, 255, 0.88)",
-  boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+  padding: "24px",
+  borderRadius: "16px",
+  background: "#ffffff",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+  border: "1px solid #f0f9ff",
+  transition: "all 0.3s ease",
 };
 
 const titleStyle = {
-  margin: "0 0 12px",
-  fontSize: "22px",
+  margin: "0 0 16px",
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#0d9488",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
 };
 
 const bodyStyle = {
   margin: 0,
-  lineHeight: 1.6,
+  lineHeight: 1.7,
   whiteSpace: "pre-wrap",
+  color: "#334155",
+  fontSize: "15px",
+  maxHeight: "400px",
+  overflowY: "auto",
 };
 
 export default Transcript;

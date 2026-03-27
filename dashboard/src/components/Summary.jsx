@@ -30,20 +30,28 @@ function Summary({ text, loading }) {
 }
 
 const cardStyle = {
-  padding: "20px",
-  borderRadius: "18px",
-  background: "rgba(255, 255, 255, 0.88)",
-  boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+  padding: "24px",
+  borderRadius: "16px",
+  background: "#ffffff",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+  border: "1px solid #f0f9ff",
+  transition: "all 0.3s ease",
 };
 
 const titleStyle = {
-  margin: "0 0 12px",
-  fontSize: "22px",
+  margin: "0 0 16px",
+  fontSize: "20px",
+  fontWeight: "700",
+  color: "#0d9488",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
 };
 
 const bodyStyle = {
   margin: 0,
-  lineHeight: 1.6,
+  lineHeight: 1.7,
+  color: "#334155",
+  fontSize: "15px",
 };
 
 const loadingStyle = {
@@ -51,21 +59,27 @@ const loadingStyle = {
   alignItems: "center",
   gap: "12px",
   margin: 0,
+  padding: "16px",
+  background: "#ecfdf5",
+  borderRadius: "12px",
 };
 
 const spinnerStyle = {
-  width: "20px",
-  height: "20px",
-  border: "2px solid #e2e8f0",
-  borderTop: "2px solid #0f766e",
+  width: "24px",
+  height: "24px",
+  border: "3px solid #d1fae5",
+  borderTop: "3px solid #0d9488",
   borderRadius: "50%",
   animation: "spin 1s linear infinite",
+  flexShrink: 0,
 };
 
 const loadingTextStyle = {
   margin: 0,
-  color: "#0f766e",
+  color: "#0d9488",
   fontStyle: "italic",
+  fontSize: "14px",
+  fontWeight: "500",
 };
 
 export default Summary;
