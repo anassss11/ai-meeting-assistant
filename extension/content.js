@@ -4,6 +4,7 @@ if (!window.__aiAssistantWidgetInjected) {
 
   const BACKEND_URL = "http://localhost:8000";
   let isRecording = false;
+  let isAnalyzing = false;
   let updateInterval = null;
 
   // Create widget container
@@ -28,9 +29,12 @@ if (!window.__aiAssistantWidgetInjected) {
         </div>
       </div>
       <div class="ai-widget-content">
+        <div class="ai-widget-status" style="display: none;">
+          <span class="ai-widget-status-text">Recording...</span>
+        </div>
         <div class="ai-widget-controls">
-          <button class="ai-widget-btn ai-widget-start" aria-label="Start analysis">Start</button>
-          <button class="ai-widget-btn ai-widget-stop" aria-label="Stop analysis" disabled>Stop</button>
+          <button class="ai-widget-btn ai-widget-start" aria-label="Start recording">Start</button>
+          <button class="ai-widget-btn ai-widget-stop" aria-label="Stop recording" disabled>Stop</button>
         </div>
         <div class="ai-widget-progress-container" style="display: none;">
           <svg class="ai-widget-progress-svg" width="100" height="100" viewBox="0 0 100 100">
@@ -83,6 +87,7 @@ if (!window.__aiAssistantWidgetInjected) {
     const startBtn = widget.querySelector(".ai-widget-start");
     const stopBtn = widget.querySelector(".ai-widget-stop");
     const content = widget.querySelector(".ai-widget-content");
+    const statusDiv = widget.querySelector(".ai-widget-status");
     const progressContainer = widget.querySelector(".ai-widget-progress-container");
     const progressCircle = widget.querySelector(".ai-widget-progress-circle");
     const progressPercentage = widget.querySelector(".ai-widget-progress-percentage");
@@ -138,11 +143,24 @@ if (!window.__aiAssistantWidgetInjected) {
       progressPercentage.textContent = progress + "%";
     }
 
-    // Start analysis
-    startBtn.addEventListener("click", async () => {
+    // Update button states
+    function updateButtonStates() {
+      startBtn.disabled = isRecording || isAnalyzing;
+      stopBtn.disabled = !isRecording || isAnalyzing;
+      statusDiv.style.display = isRecording ? "block" : "none";
+    }
+
+    // Start recording
+    startBtn.addEventListener("click", () => {
       isRecording = true;
-      startBtn.disabled = true;
-      stopBtn.disabled = false;
+      updateButtonStates();
+    });
+
+    // Stop recording and trigger analysis
+    stopBtn.addEventListener("click", async () => {
+      isRecording = false;
+      isAnalyzing = true;
+      updateButtonStates();
       progressContainer.style.display = "flex";
       updateProgressBar(0);
 
@@ -188,24 +206,15 @@ if (!window.__aiAssistantWidgetInjected) {
         setTimeout(() => {
           progressContainer.style.display = "none";
           highlightUpdatedContent();
+          isAnalyzing = false;
+          updateButtonStates();
         }, 500);
       } catch (error) {
         console.error("Error fetching analysis:", error);
         showErrorState(error.message);
         progressContainer.style.display = "none";
-      }
-    });
-
-    // Stop analysis
-    stopBtn.addEventListener("click", () => {
-      isRecording = false;
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      progressContainer.style.display = "none";
-
-      if (updateInterval) {
-        clearInterval(updateInterval);
-        updateInterval = null;
+        isAnalyzing = false;
+        updateButtonStates();
       }
     });
   }

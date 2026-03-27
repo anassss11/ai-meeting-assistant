@@ -93,6 +93,26 @@
   flex-shrink: 0;
 }
 
+/* Status Indicator */
+.ai-widget-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  background: #1f4d47;
+  border-bottom: 1px solid rgba(13, 148, 136, 0.3);
+  flex-shrink: 0;
+}
+
+.ai-widget-status-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d9488;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* Progress Bar */
 .ai-widget-progress-container {
   display: flex;
