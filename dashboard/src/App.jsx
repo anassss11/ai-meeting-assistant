@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { fetchActionItems, fetchDecisions, fetchSummary, fetchTranscript } from "./api";
 import ActionItems from "./components/ActionItems";
+import CircularProgress from "./components/CircularProgress";
 import Decisions from "./components/Decisions";
 import Summary from "./components/Summary";
 import Transcript from "./components/Transcript";
@@ -17,6 +18,8 @@ function App() {
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(true);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [completedTasks, setCompletedTasks] = useState(0);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
 
@@ -24,6 +27,8 @@ function App() {
   const loadDashboard = async (showLoading) => {
     if (showLoading) {
       setLoading(true);
+      setAnalysisProgress(0);
+      setCompletedTasks(0);
     }
 
     const errors = [];
@@ -37,13 +42,26 @@ function App() {
       setLastUpdated(new Date().toLocaleTimeString());
     };
 
+    const updateProgress = () => {
+      setCompletedTasks((prev) => {
+        const newCount = prev + 1;
+        const progress = Math.round((newCount / 4) * 100);
+        setAnalysisProgress(progress);
+        return newCount;
+      });
+    };
+
     const tasks = [
       fetchTranscript()
         .then((transcriptResponse) => {
           setData((current) => ({ ...current, transcript: transcriptResponse.transcript || "" }));
           markUpdated();
+          updateProgress();
         })
-        .catch((requestError) => recordError("transcript", requestError)),
+        .catch((requestError) => {
+          recordError("transcript", requestError);
+          updateProgress();
+        }),
       
       fetchActionItems()
         .then((actionItemsResponse) => {
@@ -52,8 +70,12 @@ function App() {
             actionItems: Array.isArray(actionItemsResponse.action_items) ? actionItemsResponse.action_items : [] 
           }));
           markUpdated();
+          updateProgress();
         })
-        .catch((requestError) => recordError("action-items", requestError)),
+        .catch((requestError) => {
+          recordError("action-items", requestError);
+          updateProgress();
+        }),
       
       fetchDecisions()
         .then((decisionsResponse) => {
@@ -62,8 +84,12 @@ function App() {
             decisions: Array.isArray(decisionsResponse.decisions) ? decisionsResponse.decisions : [] 
           }));
           markUpdated();
+          updateProgress();
         })
-        .catch((requestError) => recordError("decisions", requestError)),
+        .catch((requestError) => {
+          recordError("decisions", requestError);
+          updateProgress();
+        }),
       
       fetchSummary()
         .then((summaryResponse) => {
@@ -78,10 +104,12 @@ function App() {
           setData((current) => ({ ...current, summary: cleanedSummary }));
           markUpdated();
           setSummaryLoading(false);
+          updateProgress();
         })
         .catch((requestError) => {
           recordError("summary", requestError);
           setSummaryLoading(false);
+          updateProgress();
         }),
     ];
 
@@ -171,12 +199,16 @@ function App() {
       {loading ? <div style={infoStyle}>Loading meeting data... (NVIDIA Qwen 3.5 AI has no timeout - will wait until summary is complete)</div> : null}
       {error ? <div style={errorStyle}>Backend error: {error}</div> : null}
 
-      <section style={gridStyle}>
-        <Transcript text={data.transcript} />
-        <Summary text={data.summary} loading={summaryLoading} />
-        <ActionItems items={data.actionItems} />
-        <Decisions items={data.decisions} />
-      </section>
+      {loading ? (
+        <CircularProgress progress={analysisProgress} isComplete={false} />
+      ) : (
+        <section style={gridStyle}>
+          <Transcript text={data.transcript} />
+          <Summary text={data.summary} loading={summaryLoading} />
+          <ActionItems items={data.actionItems} />
+          <Decisions items={data.decisions} />
+        </section>
+      )}
     </main>
   );
 }
