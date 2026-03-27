@@ -14,16 +14,39 @@ if (!window.__aiAssistantWidgetInjected) {
     widget.innerHTML = `
       <div class="ai-widget-header">
         <span class="ai-widget-title">AI Assistant</span>
-        <button class="ai-widget-toggle" aria-label="Toggle widget">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <div class="ai-widget-header-buttons">
+          <button class="ai-widget-toggle" aria-label="Toggle widget">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 8L10 13L15 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="ai-widget-close" aria-label="Close widget">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="ai-widget-content">
         <div class="ai-widget-controls">
           <button class="ai-widget-btn ai-widget-start" aria-label="Start analysis">Start</button>
           <button class="ai-widget-btn ai-widget-stop" aria-label="Stop analysis" disabled>Stop</button>
+        </div>
+        <div class="ai-widget-progress-container" style="display: none;">
+          <svg class="ai-widget-progress-svg" width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#333333" stroke-width="6"/>
+            <circle class="ai-widget-progress-circle" cx="50" cy="50" r="40" fill="none" stroke="url(#progressGradient)" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0d9488"/>
+                <stop offset="100%" stop-color="#0f766e"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="ai-widget-progress-text">
+            <span class="ai-widget-progress-percentage">0%</span>
+            <p class="ai-widget-progress-label">Analyzing...</p>
+          </div>
         </div>
         <div class="ai-widget-sections">
           <div class="ai-widget-section">
@@ -56,12 +79,22 @@ if (!window.__aiAssistantWidgetInjected) {
   function initWidget() {
     const widget = createWidget();
     const toggleBtn = widget.querySelector(".ai-widget-toggle");
+    const closeBtn = widget.querySelector(".ai-widget-close");
     const startBtn = widget.querySelector(".ai-widget-start");
     const stopBtn = widget.querySelector(".ai-widget-stop");
     const content = widget.querySelector(".ai-widget-content");
+    const progressContainer = widget.querySelector(".ai-widget-progress-container");
+    const progressCircle = widget.querySelector(".ai-widget-progress-circle");
+    const progressPercentage = widget.querySelector(".ai-widget-progress-percentage");
     let isDragging = false;
     let offsetX = 0;
     let offsetY = 0;
+    let currentProgress = 0;
+
+    // Close widget
+    closeBtn.addEventListener("click", () => {
+      widget.remove();
+    });
 
     // Toggle collapse/expand
     toggleBtn.addEventListener("click", () => {
@@ -72,6 +105,9 @@ if (!window.__aiAssistantWidgetInjected) {
     // Drag functionality
     const header = widget.querySelector(".ai-widget-header");
     header.addEventListener("mousedown", (e) => {
+      if (e.target.closest(".ai-widget-close") || e.target.closest(".ai-widget-toggle")) {
+        return;
+      }
       isDragging = true;
       const rect = widget.getBoundingClientRect();
       offsetX = e.clientX - rect.left;
@@ -93,23 +129,49 @@ if (!window.__aiAssistantWidgetInjected) {
       widget.style.cursor = "grab";
     });
 
+    // Update progress bar
+    function updateProgressBar(progress) {
+      currentProgress = progress;
+      const circumference = 2 * Math.PI * 40;
+      const strokeDashoffset = circumference - (progress / 100) * circumference;
+      progressCircle.style.strokeDashoffset = strokeDashoffset;
+      progressPercentage.textContent = progress + "%";
+    }
+
     // Start analysis
     startBtn.addEventListener("click", async () => {
       isRecording = true;
       startBtn.disabled = true;
       stopBtn.disabled = false;
+      progressContainer.style.display = "flex";
+      updateProgressBar(0);
 
       // Show loading state
       showLoadingState();
 
       try {
+        // Simulate progress updates
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          if (progress < 90) {
+            progress += Math.random() * 30;
+            if (progress > 90) progress = 90;
+            updateProgressBar(Math.round(progress));
+          }
+        }, 500);
+
         // Fetch analysis data
         const response = await fetch(`${BACKEND_URL}/analysis-status`);
+        clearInterval(progressInterval);
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
+
+        // Complete progress
+        updateProgressBar(100);
 
         // Populate widget with data
         if (data.summary) {
@@ -122,11 +184,15 @@ if (!window.__aiAssistantWidgetInjected) {
           populateActionItems(data.action_items);
         }
 
-        // Highlight newly updated content
-        highlightUpdatedContent();
+        // Hide progress and show results after a short delay
+        setTimeout(() => {
+          progressContainer.style.display = "none";
+          highlightUpdatedContent();
+        }, 500);
       } catch (error) {
         console.error("Error fetching analysis:", error);
         showErrorState(error.message);
+        progressContainer.style.display = "none";
       }
     });
 
@@ -135,6 +201,7 @@ if (!window.__aiAssistantWidgetInjected) {
       isRecording = false;
       startBtn.disabled = false;
       stopBtn.disabled = true;
+      progressContainer.style.display = "none";
 
       if (updateInterval) {
         clearInterval(updateInterval);
